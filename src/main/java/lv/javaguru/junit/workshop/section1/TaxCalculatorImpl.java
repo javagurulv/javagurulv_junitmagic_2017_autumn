@@ -3,6 +3,7 @@ package lv.javaguru.junit.workshop.section1;
 public class TaxCalculatorImpl implements TaxCalculator {
 
     private TaxProviderByYear taxProviderByYear;
+    private EmailSender emailSender;
 
 
     @Override
@@ -14,9 +15,11 @@ public class TaxCalculatorImpl implements TaxCalculator {
 
         if (income <= taxBorder) {
             return income * taxBeforeBorder;
+        } else {
+            emailSender.sendEmail(income);
+            return taxBorder * taxBeforeBorder
+                    + (income - taxBorder) * taxAfterBorder;
         }
-        return taxBorder * taxBeforeBorder
-                + (income - taxBorder) * taxAfterBorder;
     }
 
 }

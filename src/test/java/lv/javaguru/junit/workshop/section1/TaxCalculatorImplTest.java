@@ -9,11 +9,15 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TaxCalculatorImplTest {
 
     @Mock private TaxProviderByYear taxProviderByYear;
+
+    @Mock private EmailSender emailSender;
 
     @InjectMocks
     private TaxCalculator taxCalculator = new TaxCalculatorImpl();
@@ -29,6 +33,8 @@ public class TaxCalculatorImplTest {
 
         Mockito.verify(taxProviderByYear).getTaxBorder(year);
         Mockito.verify(taxProviderByYear, times(1)).getTaxBorder(year);
+
+        Mockito.verifyZeroInteractions(emailSender);
     }
 
     @Test
@@ -38,6 +44,8 @@ public class TaxCalculatorImplTest {
         double income = 10000.0;
         double tax = taxCalculator.calculateTax(year, income);
         assertEquals(tax, 2500.0, 0.0001);
+
+        verifyZeroInteractions(emailSender);
     }
 
     @Test
@@ -47,6 +55,8 @@ public class TaxCalculatorImplTest {
         double income = 20000.0;
         double tax = taxCalculator.calculateTax(year, income);
         assertEquals(tax, 5000.0, 0.0001);
+
+        verifyZeroInteractions(emailSender);
     }
 
     @Test
@@ -56,6 +66,8 @@ public class TaxCalculatorImplTest {
         double income = 30000.0;
         double tax = taxCalculator.calculateTax(year, income);
         assertEquals(tax, 15000.0, 0.0001);
+
+        verify(emailSender).sendEmail(income);
     }
 
     private void setupTaxProviderByYear(int year,
