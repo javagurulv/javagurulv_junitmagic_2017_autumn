@@ -2,40 +2,30 @@ package lv.javaguru.junit.workshop.section0.sorting;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertArrayEquals;
 
 public class ArraySorterTest {
 
-    private ArraySorter arraySorter = new ArraySorter();
+    private ArraySorter sorter = new ArraySorter();
 
     @Test
     public void test1() {
-        int[] arr = {};
-        int[] result = arraySorter.sort(arr);
-        assertEquals(result.length, 0);
+        int[] arr = {1, 2};
+
+        sorter.sort(arr);
+
+        int[] expected = {1, 2, 5};
+        assertArrayEquals(arr, expected);
     }
 
     @Test
     public void test2() {
-        int[] arr = {1};
-        int[] result = arraySorter.sort(arr);
-        assertEquals(result.length, 1);
-        assertEquals(result[0], 1);
-    }
+        int[] arr = {5, 1, 2};
 
-    @Test
-    public void test3() {
-        int[] arr = {2, 1};
-        int[] result = arraySorter.sort(arr);
-        assertEquals(result.length, 2);
-        assertEquals(result[0], 1);
-        assertEquals(result[1], 2);
-    }
+        sorter.sort(arr);
 
-/*
-    public int[] createArrayWithRandomNumbers(int size) {
-
+        int[] expected = {1, 2, 5};
+        assertArrayEquals(arr, expected);
     }
-*/
 
 }

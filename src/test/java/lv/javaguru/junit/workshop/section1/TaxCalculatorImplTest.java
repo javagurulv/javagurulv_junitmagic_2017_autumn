@@ -1,90 +1,44 @@
 package lv.javaguru.junit.workshop.section1;
 
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 
-@RunWith(MockitoJUnitRunner.class)
 public class TaxCalculatorImplTest {
 
-    @Mock private TaxProviderByYear taxProviderByYear;
+    private EmailSender emailSender;
+    private TaxBarrierProvider taxBarrierProvider;
+    private TaxCalculator calculator;
 
-    @Mock private EmailSender emailSender;
-
-    @InjectMocks
-    private TaxCalculator taxCalculator = new TaxCalculatorImpl();
-
-
-    @Test
-    public void incomeZero() {
-        int year = 2010;
-        setupTaxProviderByYear(2010, 20000.0, 0.25, 0.4);
-        double income = 0.0;
-        double tax = taxCalculator.calculateTax(year, income);
-        assertEquals(tax, 0.0, 0.0001);
-
-        Mockito.verify(taxProviderByYear).getTaxBorder(year);
-        Mockito.verify(taxProviderByYear, times(1)).getTaxBorder(year);
-
-        Mockito.verifyZeroInteractions(emailSender);
+    @Before
+    public void init() {
+        emailSender = Mockito.mock(EmailSender.class);
+        taxBarrierProvider = Mockito.mock(TaxBarrierProvider.class);
+        Mockito.when(taxBarrierProvider.getBarrier(2017))
+                .thenReturn(20000.0);
+        Mockito.when(taxBarrierProvider.getBarrier(2018))
+                .thenReturn(20000.0);
+        calculator = new TaxCalculatorImpl(taxBarrierProvider, emailSender);
     }
 
     @Test
-    public void income10k() {
-        int year = 2010;
-        setupTaxProviderByYear(2010, 20000.0, 0.25, 0.4);
-        double income = 10000.0;
-        double tax = taxCalculator.calculateTax(year, income);
-        assertEquals(tax, 2500.0, 0.0001);
-
-        verifyZeroInteractions(emailSender);
+    public void shouldReturnZeroIfIncomeIsZero() {
+        double tax = calculator.calculateTax(2017, 0.0);
+        assertEquals(tax, 0.0, 0.001);
     }
 
     @Test
-    public void income20k() {
-        int year = 2010;
-        setupTaxProviderByYear(2010, 20000.0, 0.25, 0.4);
-        double income = 20000.0;
-        double tax = taxCalculator.calculateTax(year, income);
-        assertEquals(tax, 5000.0, 0.0001);
-
-        verifyZeroInteractions(emailSender);
+    public void shouldReturn25PercentTaxIfIncomeLessThen20k() {
+        assertEquals(calculator.calculateTax(2018, 10000.0), 2500.0, 0.001);
     }
 
     @Test
-    public void income30k() {
-        int year = 2010;
-        setupTaxProviderByYear(2010, 20000.0, 0.5, 0.5);
-        double income = 30000.0;
-        double tax = taxCalculator.calculateTax(year, income);
-        assertEquals(tax, 15000.0, 0.0001);
-
-        verify(emailSender).sendEmail(income);
-    }
-
-    private void setupTaxProviderByYear(int year,
-                                        double taxBorder,
-                                        double taxBeforeBorder,
-                                        double taxAfterBorder) {
-        Mockito.doReturn(taxBorder)
-                .when(taxProviderByYear)
-                .getTaxBorder(year);
-
-        Mockito.doReturn(taxBeforeBorder)
-                .when(taxProviderByYear)
-                .getTaxBeforeBorder(year);
-
-        Mockito.doReturn(taxAfterBorder)
-                .when(taxProviderByYear)
-                .getTaxAfterBorder(year);
+    public void shouldReturn40PercentTaxIfIncomeMoreThen20k() {
+        double tax = calculator.calculateTax(2017, 100000.0);
+        assertEquals(tax, 37000.0, 0.001);
+        Mockito.verify(emailSender).sendEmail(2017, 100000.0);
     }
 
 }

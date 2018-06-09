@@ -1,5 +1,8 @@
 package lv.javaguru.junit.workshop.section1;
 
 public interface EmailSender {
-    void sendEmail(double income);
+    void sendEmail(int year, double income);
+
+    void sendEmail(IncomeInfo incomeInfo);
+
 }
